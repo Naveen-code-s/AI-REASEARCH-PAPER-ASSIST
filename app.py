@@ -7,8 +7,10 @@ from pdf_processor import (
 
 from rag_pipeline import (
     create_vector_store,
-    answer_question
+    answer_question,
+    answer_question_hybrid
 )
+
 
 from citation_engine import generate_citations
 
@@ -103,7 +105,7 @@ question = st.text_area(
 )
 
 
-if st.button("🤖 Ask AI"):
+if st.button("🤖 "):
 
     if st.session_state.vector_db is None:
 
@@ -123,10 +125,11 @@ if st.button("🤖 Ask AI"):
             "Searching papers and generating answer..."
         ):
 
-            answer, documents = answer_question(
-                st.session_state.vector_db,
-                question
-            )
+          answer, documents, global_papers = answer_question_hybrid(
+    st.session_state.vector_db,
+    question
+)
+            
 
         st.subheader("🤖 Answer")
 
