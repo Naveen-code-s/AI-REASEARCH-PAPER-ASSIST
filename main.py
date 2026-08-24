@@ -7,12 +7,14 @@ from pdf_processor import (
 
 from rag_pipeline import (
     create_vector_store,
-    answer_question
+    answer_question,
+    answer_question_hybrid
 )
+
 
 from citation_engine import generate_citations
 from global_search import search_global_papers
-
+from citation_finder import find_citations
 st.set_page_config(
     page_title="AI Research Paper Assistant",
     page_icon="📚",
@@ -123,10 +125,11 @@ if st.button("🤖 Ask AI"):
             "Searching papers and generating answer..."
         ):
 
-            answer, documents = answer_question(
-                st.session_state.vector_db,
-                question
-            )
+            answer, documents, global_papers = answer_question_hybrid(
+    st.session_state.vector_db,
+    question
+)
+            
 
         st.subheader("🤖 Answer")
 
@@ -222,4 +225,111 @@ if st.button("🌍 Search Global Papers"):
                             "🔗 Open Original Source",
                             paper["url"]
                         ) 
-st.write("✅ GLOBAL SEARCH TEST - MAIN.PY UPDATED")                       
+st.write("✅ GLOBAL SEARCH TEST - MAIN.PY UPDATED")  
+st.divider()
+
+st.subheader("📝 Intelligent Citation Finder")
+
+st.caption(
+    "Paste a research claim or statement to find relevant academic papers."
+)
+
+claim = st.text_area(
+    "Enter your research claim",
+    placeholder=(
+        "Example: Retrieval-Augmented Generation "
+        "can improve factual accuracy in language models."
+    ),
+    key="citation_claim"
+)
+
+if st.button(
+    "🔍 Find Supporting Papers",
+    key="find_citations_button"
+):
+
+    if not claim.strip():
+
+        st.warning(
+            "Please enter a research claim first."
+        )
+
+    else:
+
+        with st.spinner(
+            "Searching academic sources for relevant papers..."
+        ):
+
+            recommendations = find_citations(
+                claim
+            )
+
+        if not recommendations:
+
+            st.warning(
+                "No relevant papers found. Try rephrasing your claim."
+            )
+
+        else:
+
+            st.success(
+                f"Found {len(recommendations)} citation recommendations."
+            )
+
+            for index, paper in enumerate(
+                recommendations,
+                start=1
+            ):
+
+                with st.expander(
+                    f"📚 Citation {index}: {paper['title']}"
+                ):
+
+                    authors = ", ".join(
+                        paper.get("authors", [])[:5]
+                    )
+
+                    st.write(
+                        f"**Authors:** {authors or 'Unknown'}"
+                    )
+
+                    st.write(
+                        f"**Year:** "
+                        f"{paper.get('year', 'Unknown')}"
+                    )
+
+                    st.write(
+                        f"**Database:** "
+                        f"{paper.get('source', 'Unknown')}"
+                    )
+
+                    st.info(
+                        paper.get(
+                            "evidence_status",
+                            "Verify source before citing"
+                        )
+                    )
+
+                    if paper.get("abstract"):
+
+                        st.write(
+                            "**Available Abstract:**"
+                        )
+
+                        st.write(
+                            paper["abstract"]
+                        )
+
+                    if paper.get("doi"):
+
+                        st.write(
+                            f"**DOI:** {paper['doi']}"
+                        )
+
+                    if paper.get("url"):
+
+                        st.link_button(
+                            "🔗 Verify / Open Original Paper",
+                            paper["url"],
+                            key=f"citation_link_{index}"
+                        )
