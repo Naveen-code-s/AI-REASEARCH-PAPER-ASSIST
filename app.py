@@ -11,7 +11,7 @@ from rag_pipeline import (
 )
 
 from citation_engine import generate_citations
-from global_search import search_global_papers
+
 
 st.set_page_config(
     page_title="AI Research Paper Assistant",
@@ -176,50 +176,3 @@ Page: {citation["page"]}
                 st.write(
                     doc.page_content
                 )
-st.divider()
-               
-st.subheader("🌍 Global Academic Paper Search")
-
-global_query = st.text_input(
-    "Enter a research topic",
-    placeholder="Example: Retrieval Augmented Generation"
-)
-
-if st.button("🌍 Search Global Papers"):
-
-    if not global_query.strip():
-        st.warning("Please enter a research topic.")
-
-    else:
-        with st.spinner("Searching global academic sources..."):
-
-            papers = search_global_papers(global_query)
-
-        if not papers:
-            st.warning("No papers found. Try another topic.")
-
-        else:
-            st.success(f"Found {len(papers)} research papers.")
-
-            for index, paper in enumerate(papers, start=1):
-
-                with st.expander(
-                    f"📄 {index}. {paper['title']}"
-                ):
-
-                    st.write(f"**Source:** {paper['source']}")
-                    st.write(f"**Year:** {paper['year']}")
-
-                    authors = ", ".join(paper["authors"][:5])
-                    st.write(f"**Authors:** {authors}")
-
-                    if paper.get("abstract"):
-                        st.write("**Abstract:**")
-                        st.write(paper["abstract"])
-
-                    if paper.get("url"):
-                        st.link_button(
-                            "🔗 Open Original Source",
-                            paper["url"]
-                        ) 
-st.write("✅ GLOBAL SEARCH TEST - MAIN.PY UPDATED")                       
