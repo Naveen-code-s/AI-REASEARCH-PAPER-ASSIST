@@ -1,37 +1,38 @@
-from langchain_groq import ChatGroq
 
-from config import LLM_MODEL
+from rag_pipeline import get_llm
 
 
 def summarize_paper(text):
-
-    llm = ChatGroq(
-       model="llama-3.1-8b-instant",
-        temperature=0.1
-    )
+    if not text or not text.strip():
+        raise ValueError("No research-paper text provided.")
 
     prompt = f"""
-You are an academic research assistant.
+You are ResearchAI, an academic research analyst.
 
-Summarize the following research paper.
+Summarize the provided research paper.
 
-Include:
+Use these sections:
 
-- Research problem
-- Objective
-- Methodology
-- Dataset
-- Main findings
-- Limitations
-- Conclusion
+1. Research Problem
+2. Research Objectives
+3. Methodology
+4. Dataset and Participants
+5. Tools and Technologies
+6. Main Findings
+7. Limitations
+8. Conclusion
+9. Future Research Directions
 
-Do not invent information.
+Rules:
+- Use only the supplied paper text.
+- Do not invent datasets, results or statistics.
+- Mark unavailable information as "Not reported".
+- Preserve important technical terminology.
 
 Research Paper:
-
 {text}
 """
 
-    response = llm.invoke(prompt)
+    response = get_llm().invoke(prompt)
 
     return response.content
